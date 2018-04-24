@@ -17,7 +17,7 @@
       <img src="images/3.jpg" class="img-thumbnail" style="height:350px;">
     </div>
   </div>
-  
+
   <div class="my-3">
     <form action="/get_images" method="POST">
       <div class="form-group">
@@ -55,14 +55,12 @@
       url: '/get_images',
       data: { ig_url: $('#ig_url').val() }
     }).done(function(data){
-      data = JSON.parse(data);
-      
-      for (let i = 0;i < data.length;i++) {
-        let temp_img = `<img src="${data[i]}" class="img-thumbnail"/>`;
+      result = data.result
+      for (let i = 0; i < result.length; i++) {
+        let temp_img = result[i].is_video ? `<img src="${result[i].image_url}" class="img-thumbnail"/><button type="submit" class="btn" style="background-color:#ffb3b3;float:right;" onclick="window.open('${result[i].video_url}')">影片點此</button>` : `<img src="${result[i].image_url}" class="img-thumbnail"/>`;
         $('.modal-body').prepend(temp_img);
       }
       $('.modal').modal('show');
-      
     })
   })
 </script>

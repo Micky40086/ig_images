@@ -20,14 +20,22 @@ post '/get_images' do
 
   fetch_data = JSON.parse(temp_str)['entry_data']['PostPage'][0]['graphql']['shortcode_media']
   if fetch_data['edge_sidecar_to_children']
-    fetch_data['edge_sidecar_to_children']['edges'].each_with_index do |hehe,index|
-      temp_array.push(hehe['node']['display_url'])
+    fetch_data['edge_sidecar_to_children']['edges'].each do |item|
+      temp_array.push({ 
+        image_url: item['node']['display_url'],
+        video_url: item['node']['video_url'],
+        is_video: item['node']['is_video'] ? true : false
+      })
     end
   else 
-    temp_array.push(fetch_data['display_url'])
+    temp_array.push({ 
+      image_url: fetch_data['display_url'],
+      video_url: fetch_data['video_url'],
+      is_video: fetch_data['is_video'] ? true : false
+    })
   end
 
   status 200
-  return temp_array.to_json
-  
+  content_type :json
+  { result: temp_array }.to_json
 end
