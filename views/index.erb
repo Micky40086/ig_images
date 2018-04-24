@@ -5,16 +5,16 @@
 </style>
 
 
-<div class="container">
+<div class="container mt-5">
   <div class="row">
     <div class="col-md-4">
-      <img src="./images/1.jpg" class="img-thumbnail" style="height:350px;">
+      <img src="images/1.jpg" class="img-thumbnail" style="height:350px;">
     </div>
     <div class="col-md-4">
-      <img src="./images/2.jpg" class="img-thumbnail" style="height:350px;">
+      <img src="images/2.jpg" class="img-thumbnail" style="height:350px;">
     </div>
     <div class="col-md-4">
-      <img src="./images/3.jpg" class="img-thumbnail" style="height:350px;">
+      <img src="images/3.jpg" class="img-thumbnail" style="height:350px;">
     </div>
   </div>
   
@@ -32,7 +32,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+          <h5 class="modal-title" id="exampleModalLongTitle">照片：</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -59,7 +59,7 @@
       
       for (let i = 0;i < data.length;i++) {
         let temp_img = `<img src="${data[i]}" class="img-thumbnail"/>`;
-        $('.modal-body').append(temp_img);
+        $('.modal-body').prepend(temp_img);
       }
       $('.modal').modal('show');
       
