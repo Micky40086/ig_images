@@ -4,6 +4,7 @@ require 'sinatra'
 require 'nokogiri'
 require 'open-uri'
 require 'json'
+require 'rufus-scheduler'
 
 get '/' do
   erb :index
@@ -39,3 +40,30 @@ post '/get_images' do
   content_type :json
   { result: temp_array }.to_json
 end
+
+get '/hehe' do
+  current_time = Time.now.to_i
+  temp_json = getInstagramJson("https://www.instagram.com/ahnhani_92/")
+  temp_array = []
+  posts = JSON.parse(temp_json)['entry_data']['ProfilePage'][0]['graphql']['user']['edge_owner_to_timeline_media']['edges']
+  posts.each do |post|
+    if current_time - post['node']['taken_at_timestamp'] <= 300
+      puts "五分鐘內"
+    else 
+      break
+    end
+  end
+end
+
+def getInstagramJson(url)
+  doc = Nokogiri::HTML(open(url))
+  temp_json = doc.xpath("//script")[2].text
+  temp_json.slice! "window._sharedData = "
+  temp_json = temp_json[0,temp_json.length-1]
+  return temp_json
+end
+
+#scheduler = Rufus::Scheduler.new
+#scheduler.every '30s' do
+#  puts "change the oil filter!"
+#end
