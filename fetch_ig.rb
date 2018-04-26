@@ -5,9 +5,32 @@ require 'nokogiri'
 require 'open-uri'
 require 'json'
 require 'rufus-scheduler'
+require 'line/bot'
 
 get '/' do
   erb :index
+  puts params
+end
+
+post '/' do
+  body = request.body.read
+
+  signature = request.env['HTTP_X_LINE_SIGNATURE']
+  puts signature
+  puts ENV["LINE_CHANNEL_TOKEN"]
+  unless client.validate_signature(body, signature)
+    error 400 do 'Bad Request' end
+  end
+
+  message = {
+    type: 'text',
+    text: 'hello'
+  }
+  
+  response = client.push_message("<to>", message)
+  p response
+
+  "OK"
 end
 
 post '/get_images' do
@@ -53,6 +76,13 @@ get '/hehe' do
       break
     end
   end
+end
+
+def client
+  @client ||= Line::Bot::Client.new { |config|
+    config.channel_secret = "6452fb1e7907ebd9dd27200fb4fdacba"
+    config.channel_token = "odWztlhkQQk012eRT8z/o8xGcyO1U9M4+mf/a5DAOld3tT3eOzuOT1oF8dnD0LVXazC+yeCPbcyXhXuXauqwKqobqPjWPrwB0n51k8jKNDR1cUhl4ixu9RuYuMkX164fipeVsTDhSPMcEmxv638yVgdB04t89/1O/w1cDnyilFU="
+  }
 end
 
 def getInstagramJson(url)
