@@ -14,21 +14,46 @@ end
 
 post '/' do
   body = request.body.read
-
+  
   signature = request.env['HTTP_X_LINE_SIGNATURE']
-  puts signature
-  puts ENV["LINE_CHANNEL_TOKEN"]
   unless client.validate_signature(body, signature)
     error 400 do 'Bad Request' end
   end
 
-  message = {
-    type: 'text',
-    text: 'hello'
+
+
+  events = client.parse_events_from(body)
+  events.each { |event|
+    puts event['source']['userId']
+    case event
+    when Line::Bot::Event::Message
+      case event.type
+      when Line::Bot::Event::MessageType::Text
+        #message = {
+        #  type: 'text',
+        #  text: event.message['text']
+        #}
+        #client.reply_message(event['replyToken'], message)
+        message = {
+          type: "image",
+          originalContentUrl: "https://scontent-tpe1-1.cdninstagram.com/vp/331ba48e05a3dfe09a529e2c5c3ea0db/5B9C2CE1/t51.2885-15/e35/30591957_608972819462853_200879017753051136_n.jpg",
+          previewImageUrl: "https://scontent-tpe1-1.cdninstagram.com/vp/331ba48e05a3dfe09a529e2c5c3ea0db/5B9C2CE1/t51.2885-15/e35/30591957_608972819462853_200879017753051136_n.jpg"
+        }
+        response = client.push_message(event['source']['userId'], message)
+        p response
+      when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
+        response = client.get_message_content(event.message['id'])
+        tf = Tempfile.open("content")
+        tf.write(response.body)
+      end
+    end
   }
+
   
-  response = client.push_message("<to>", message)
-  p response
+  
+  
+  #
+  #
 
   "OK"
 end
