@@ -9,7 +9,6 @@ require 'line/bot'
 
 get '/' do
   erb :index
-  puts params
 end
 
 post '/' do
@@ -24,7 +23,6 @@ post '/' do
 
   events = client.parse_events_from(body)
   events.each { |event|
-    puts event['source']['userId']
     case event
     when Line::Bot::Event::Message
       case event.type
@@ -48,12 +46,6 @@ post '/' do
       end
     end
   }
-
-  
-  
-  
-  #
-  #
 
   "OK"
 end
