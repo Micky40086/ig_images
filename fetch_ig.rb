@@ -6,6 +6,7 @@ require 'open-uri'
 require 'json'
 require 'rufus-scheduler'
 require 'line/bot'
+require './check_list'
 
 get '/' do
   erb :index
@@ -13,7 +14,7 @@ end
 
 post '/' do
   body = request.body.read
-  
+  puts body
   signature = request.env['HTTP_X_LINE_SIGNATURE']
   unless client.validate_signature(body, signature)
     error 400 do 'Bad Request' end
@@ -32,6 +33,7 @@ post '/' do
         #  text: event.message['text']
         #}
         #client.reply_message(event['replyToken'], message)
+        
         message = {
           type: "image",
           originalContentUrl: "https://scontent-tpe1-1.cdninstagram.com/vp/331ba48e05a3dfe09a529e2c5c3ea0db/5B9C2CE1/t51.2885-15/e35/30591957_608972819462853_200879017753051136_n.jpg",
