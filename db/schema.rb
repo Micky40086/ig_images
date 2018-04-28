@@ -10,11 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_04_27_081146) do
+ActiveRecord::Schema.define(version: 2018_04_28_041940) do
+
+  create_table "ig_items", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "account"
+    t.index ["user_id"], name: "index_ig_items_on_user_id"
+  end
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "identity"
     t.string "source_id"
   end
 
+  add_foreign_key "ig_items", "users"
 end

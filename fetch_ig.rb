@@ -6,13 +6,13 @@ require 'open-uri'
 require 'json'
 require 'rufus-scheduler'
 require 'line/bot'
-require './check_list'
+require './user'
 
 get '/' do
   erb :index
 end
 
-post '/' do
+post '/line_bot' do
   body = request.body.read
   puts body
   signature = request.env['HTTP_X_LINE_SIGNATURE']
@@ -20,31 +20,28 @@ post '/' do
     error 400 do 'Bad Request' end
   end
 
-
-
   events = client.parse_events_from(body)
   events.each { |event|
     case event
     when Line::Bot::Event::Message
       case event.type
       when Line::Bot::Event::MessageType::Text
-        #message = {
-        #  type: 'text',
-        #  text: event.message['text']
-        #}
-        #client.reply_message(event['replyToken'], message)
-        
-        message = {
-          type: "image",
-          originalContentUrl: "https://scontent-tpe1-1.cdninstagram.com/vp/331ba48e05a3dfe09a529e2c5c3ea0db/5B9C2CE1/t51.2885-15/e35/30591957_608972819462853_200879017753051136_n.jpg",
-          previewImageUrl: "https://scontent-tpe1-1.cdninstagram.com/vp/331ba48e05a3dfe09a529e2c5c3ea0db/5B9C2CE1/t51.2885-15/e35/30591957_608972819462853_200879017753051136_n.jpg"
-        }
-        response = client.push_message(event['source']['userId'], message)
-        p response
+        user = source_user(event['source'])
+        if event.message['type'] == 'text'
+          
+          reply_message = handle_message(user,event.message['text'])
+          if reply_message.present?
+            message = {
+              type: 'text',
+              text: reply_message
+            }
+            client.reply_message(event['replyToken'], message)
+          end
+        end
       when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
-        response = client.get_message_content(event.message['id'])
-        tf = Tempfile.open("content")
-        tf.write(response.body)
+        #response = client.get_message_content(event.message['id'])
+        #tf = Tempfile.open("content")
+        #tf.write(response.body)
       end
     end
   }
@@ -83,18 +80,46 @@ post '/get_images' do
   { result: temp_array }.to_json
 end
 
-get '/hehe' do
+get '/run_HEHE' do
   current_time = Time.now.to_i
-  temp_json = getInstagramJson("https://www.instagram.com/ahnhani_92/")
-  temp_array = []
-  posts = JSON.parse(temp_json)['entry_data']['ProfilePage'][0]['graphql']['user']['edge_owner_to_timeline_media']['edges']
-  posts.each do |post|
-    if current_time - post['node']['taken_at_timestamp'] <= 300
-      puts "五分鐘內"
-    else 
-      break
+  User.all.each do |user|
+    user.ig_items.each do |item|
+      begin
+        latest_posts = []
+        temp_json = getInstagramJson("https://www.instagram.com/#{item.account}/")
+        posts = JSON.parse(temp_json)['entry_data']['ProfilePage'][0]['graphql']['user']['edge_owner_to_timeline_media']['edges']
+        posts.each do |post|
+          node = post['node']
+          if current_time - node['taken_at_timestamp'] <= 1000000
+            latest_posts.push(node['shortcode'])
+            puts "五分鐘內"
+          else 
+            break
+          end
+        end
+
+        latest_posts.each do |post_id|
+          post_json = getInstagramJson("https://www.instagram.com/p/#{post_id}/")
+          media = JSON.parse(post_json)['entry_data']['PostPage'][0]['graphql']['shortcode_media']
+          if media['edge_sidecar_to_children']
+            media['edge_sidecar_to_children']['edges'].each do |item|
+              item['node']['is_video'] ? message = video_template(item['node']['video_url'], item['node']['display_url']) : message = image_template(item['node']['display_url'])
+              client.push_message(user.source_id, message)
+            end
+          else 
+            media['is_video'] ? message = video_template(media['video_url'], media['display_url']) : message = image_template(media['display_url'])
+            client.push_message(user.source_id, message)
+          end
+        end
+      rescue
+        puts "hehehe ERROR"
+      end
     end
   end
+
+  status 200
+  content_type :json
+  { result: "just_test" }.to_json
 end
 
 def client
@@ -112,7 +137,18 @@ def getInstagramJson(url)
   return temp_json
 end
 
-#scheduler = Rufus::Scheduler.new
-#scheduler.every '30s' do
-#  puts "change the oil filter!"
-#end
+def image_template(img_url)
+  {
+    type: "image",
+    originalContentUrl: img_url,
+    previewImageUrl: img_url
+  }
+end
+
+def video_template(video_url, img_url) 
+  {
+    type: "video",
+    originalContentUrl: video_url,
+    previewImageUrl: img_url
+  }
+end
