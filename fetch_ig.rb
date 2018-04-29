@@ -4,7 +4,6 @@ require 'sinatra'
 require 'nokogiri'
 require 'open-uri'
 require 'json'
-require 'rufus-scheduler'
 require 'line/bot'
 require './user'
 
