@@ -17,7 +17,7 @@ def source_user(source_json)
   when 'user'
     User.find_or_create_by(source_id: source_json['userId'], identity: 0)
   when 'group'
-    User.find_or_create_by(source_id: source_json['GroupId'], identity: 1)
+    User.find_or_create_by(source_id: source_json['groupId'], identity: 1)
   end
 end
 
