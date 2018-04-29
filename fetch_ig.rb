@@ -90,9 +90,8 @@ get '/run_HEHE' do
         posts = JSON.parse(temp_json)['entry_data']['ProfilePage'][0]['graphql']['user']['edge_owner_to_timeline_media']['edges']
         posts.each do |post|
           node = post['node']
-          if current_time - node['taken_at_timestamp'] <= 1000000
+          if current_time - node['taken_at_timestamp'] <= 300
             latest_posts.push(node['shortcode'])
-            puts "五分鐘內"
           else 
             break
           end

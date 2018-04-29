@@ -25,13 +25,11 @@ namespace :send do
                         media = JSON.parse(post_json)['entry_data']['PostPage'][0]['graphql']['shortcode_media']
                         if media['edge_sidecar_to_children']
                             media['edge_sidecar_to_children']['edges'].each do |item|
-                                
                                 if item['node']['is_video'] 
                                     message = video_template(item['node']['video_url'], item['node']['display_url'])
                                 else
                                     message = image_template(item['node']['display_url'])
                                 end
-                                puts message
                                 client.push_message(user.source_id, message)
                             end
                         else 
