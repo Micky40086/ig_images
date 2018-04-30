@@ -9,7 +9,7 @@ development:
 production:
   adapter: mysql2
   database: ig_line_bot
-  host: aac03yffd6n405.cexdumasqbd7.us-west-2.rds.amazonaws.com
+  host: aairbpykt0kz5q.cexdumasqbd7.us-west-2.rds.amazonaws.com
   username: Micky40086
   password: hehehehe
   encoding: utf8
